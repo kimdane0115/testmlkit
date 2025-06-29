@@ -31,6 +31,10 @@ class TextRecognizerPainter extends CustomPainter {
     final Paint background = Paint()..color = Color(0x99000000);
 
     for (final textBlock in recognizedText.blocks) {
+      int discountedPrice = calculateDiscountedPrice(textBlock.text, 0.2);
+      if (discountedPrice == 0) {
+        continue;
+      }
       final ParagraphBuilder builder = ParagraphBuilder(
         ParagraphStyle(
             textAlign: TextAlign.left,
@@ -39,7 +43,10 @@ class TextRecognizerPainter extends CustomPainter {
       );
       builder.pushStyle(
           ui.TextStyle(color: Colors.lightGreenAccent, background: background));
-      builder.addText(textBlock.text);
+      builder.addText("${textBlock.text}\n");
+      builder.pushStyle(
+          ui.TextStyle(color: Colors.red, background: background));
+      builder.addText('할인된 가격: ${formatWithCommas(discountedPrice)}원');
       builder.pop();
 
       final left = translateX(
@@ -181,5 +188,30 @@ class TextRecognizerPainter extends CustomPainter {
   @override
   bool shouldRepaint(TextRecognizerPainter oldDelegate) {
     return oldDelegate.recognizedText != recognizedText;
+  }
+
+  int calculateDiscountedPrice(String priceStr, double discountRate) {
+    if (!isNumericOnly(priceStr.replaceAll(',', ''))) {
+      return 0;
+    }
+    // "52,300" → 52300
+    int price = int.parse(priceStr.replaceAll(',', ''));
+
+    // 20% 할인 → 80% 계산
+    int discounted = (price * (1 - discountRate)).round();
+
+    return discounted;
+  }
+
+  String formatWithCommas(int number) {
+    return number.toString().replaceAllMapped(
+      RegExp(r'\B(?=(\d{3})+(?!\d))'),
+      (match) => ',',
+    );
+  }
+
+  bool isNumericOnly(String input) {
+    // 문자열이 비어 있지 않고 오직 숫자로만 구성되어 있는 경우 true
+    return RegExp(r'^\d+$').hasMatch(input);
   }
 }
