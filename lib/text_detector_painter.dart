@@ -38,15 +38,18 @@ class TextRecognizerPainter extends CustomPainter {
       final ParagraphBuilder builder = ParagraphBuilder(
         ParagraphStyle(
             textAlign: TextAlign.left,
-            fontSize: 16,
+            fontSize: 20,
             textDirection: TextDirection.ltr),
       );
+      // 기존 가격
       builder.pushStyle(
           ui.TextStyle(color: Colors.lightGreenAccent, background: background));
       builder.addText("${textBlock.text}\n");
+
+      // 할인된 가격
       builder.pushStyle(
           ui.TextStyle(color: Colors.red, background: background));
-      builder.addText('할인된 가격: ${formatWithCommas(discountedPrice)}원');
+      builder.addText('${formatWithCommas(discountedPrice)}원');
       builder.pop();
 
       final left = translateX(
@@ -173,7 +176,7 @@ class TextRecognizerPainter extends CustomPainter {
       canvas.drawParagraph(
         builder.build()
           ..layout(ParagraphConstraints(
-            width: (right - left).abs(),
+            width: (right - left).abs() * 2,
           )),
         Offset(
             Platform.isAndroid &&
